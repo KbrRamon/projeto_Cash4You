@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="page-title">Cash4You</h1>
+<div class="panel welcome">
+  <b>Bem-vindo ao Cash4You</b>
+  <p>Gerencie seus produtos, serviços e contas a pagar.</p>
+</div>
+
+<div class="grid3">
+  <div class="panel">
+    <h2>Total em produtos</h2>
+    <p>R$ {{ total_produtos|floatformat:2 }}</p>
+  </div>
+  <div class="panel">
+    <h2>Total em serviços</h2>
+    <p>R$ {{ total_servicos|floatformat:2 }}</p>
+  </div>
+  <div class="panel">
+    <h2>Contas próximas</h2>
+    <p>{{ contas|length }}</p>
+  </div>
+</div>
+{% endblock %}

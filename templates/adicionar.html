@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="page-title">Adicionar Novo Registro</h1>
+<div class="panel">
+  <label>Selecione uma opção</label>
+  <select id="tipo-add" onchange="location = '?tipo=' + this.value;">
+    <option value="produto" {% if tipo_atual == 'produto' %}selected{% endif %}>Produtos</option>
+    <option value="servico" {% if tipo_atual == 'servico' %}selected{% endif %}>Serviços</option>
+    <option value="conta" {% if tipo_atual == 'conta' %}selected{% endif %}>Contas a Pagar</option>
+  </select>
+
+  <form method="post" action="{% url 'adicionar' %}?tipo={{ tipo_atual }}">
+    {% csrf_token %}
+    
+    {% if tipo_atual == 'produto' %}
+      <div class="grid2">
+        <div><label>Nome</label>{{ form_prod.nome }}</div>
+        <div><label>Quantidade</label>{{ form_prod.quantidade }}</div>
+      </div>
+      <div class="grid2">
+        <div><label>Preço de Custo</label>{{ form_prod.preco_custo }}</div>
+        <div><label>Preço de Venda</label>{{ form_prod.preco_venda }}</div>
+      </div>
+    {% elif tipo_atual == 'servico' %}
+      <div class="grid2">
+        <div><label>Nome</label>{{ form_serv.nome }}</div>
+        <div><label>Preço</label>{{ form_serv.preco }}</div>
+      </div>
+    {% else %}
+      <div class="grid2">
+        <div><label>Nome</label>{{ form_conta.nome }}</div>
+        <div><label>Valor</label>{{ form_conta.valor }}</div>
+      </div>
+      <label>Vencimento</label>{{ form_conta.vencimento }}
+      <div class="check-row">
+        {{ form_conta.paga }}
+        <label for="{{ form_conta.paga.id_for_label }}">Já paga</label>
+      </div>
+    {% endif %}
+
+    <div class="mt">
+      <button type="submit" class="primary">Adicionar</button>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  <h2>
+    {% if tipo_atual == 'produto' %}Produtos
+    {% elif tipo_atual == 'servico' %}Serviços
+    {% else %}Contas a Pagar{% endif %}
+  </h2>
+  <table>
+    <thead>
+      <tr>
+        {% if tipo_atual == 'produto' %}
+          <th>Nome</th><th>Quantidade</th><th>Preço de Custo</th><th>Preço de Venda</th><th>Ações</th>
+        {% elif tipo_atual == 'servico' %}
+          <th>Nome</th><th>Preço</th><th>Ações</th>
+        {% else %}
+          <th>Nome</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Ações</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% if tipo_atual == 'produto' %}
+        {% for item in produtos %}
+          <tr>
+            <td>{{ item.nome }}</td><td>{{ item.quantidade }}</td><td>R${{ item.preco_custo }}</td><td>R${{ item.preco_venda }}</td>
+            <td class="acoes"><a href="{% url 'excluir_item' 'produto' item.id %}" class="del">✕</a></td>
+          </tr>
+        {% empty %}
+          <tr class="empty-row"><td colspan="5">Nenhum produto cadastrado.</td></tr>
+        {% endfor %}
+      {% elif tipo_atual == 'servico' %}
+        {% for item in servicos %}
+          <tr>
+            <td>{{ item.nome }}</td><td>R${{ item.preco }}</td>
+            <td class="acoes"><a href="{% url 'excluir_item' 'servico' item.id %}" class="del">✕</a></td>
+          </tr>
+        {% empty %}
+          <tr class="empty-row"><td colspan="3">Nenhum serviço cadastrado.</td></tr>
+        {% endfor %}
+      {% else %}
+        {% for item in contas %}
+          <tr>
+            <td>{{ item.nome }}</td><td>R${{ item.valor }}</td><td>{{ item.vencimento|date:"d/m/Y" }}</td>
+            <td><span class="badge {% if item.paga %}ok{% else %}no{% endif %}">{% if item.paga %}Paga{% else %}Não{% endif %}</span></td>
+            <td class="acoes"><a href="{% url 'excluir_item' 'conta' item.id %}" class="del">✕</a></td>
+          </tr>
+        {% empty %}
+          <tr class="empty-row"><td colspan="5">Nenhuma conta cadastrada.</td></tr>
+        {% endfor %}
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

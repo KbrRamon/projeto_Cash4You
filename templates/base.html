@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}Cash4You{% endblock %}</title>
+  <style>
+    :root {
+      --bg:#10151C; --sidebar:#141B24; --panel:#1B2430; --panel2:#212C3A;
+      --ink:#EAEDF2; --ink-soft:#8B95A5; --line:#2A3441;
+      --accent:#3B82F6; --accent-soft:#1E2A3E;
+      --ok:#22C55E; --ok-soft:#14301F; --danger:#EF4444; --danger-soft:#33191B;
+      box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); min-height:100vh; display:flex;
+      font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+    aside { width:220px; flex-shrink:0; background:var(--sidebar); border-right:1px solid var(--line);
+      padding:20px 14px; display:flex; flex-direction:column; gap:2px; position:sticky; top:0; height:100vh; }
+    .brand { font-size:1.6rem; font-weight:750; padding:4px 8px 22px; letter-spacing:-0.01em; }
+    .brand span { color:var(--accent); }
+    .nav-item { display:flex; align-items:center; padding:9px 10px; border-radius:7px;
+      color:var(--ink-soft); font-size:0.86rem; font-weight:550; text-decoration:none; cursor:pointer; }
+    .nav-item:hover { background:var(--panel2); color:var(--ink); }
+    .nav-item.active { background:var(--accent-soft); color:var(--accent); }
+
+    main { flex:1; padding:28px 32px 60px; min-width:0; }
+    .page-title { font-size:1.3rem; font-weight:650; margin:0 0 18px; }
+
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:22px; margin-bottom:18px; }
+    .panel h2 { font-size:0.95rem; font-weight:650; margin:0 0 14px; }
+    .welcome { max-width:480px; color:var(--ink-soft); font-size:0.95rem; line-height:1.6; }
+    .welcome b { color:var(--ink); font-size:1.1rem; display:block; margin-bottom:8px; }
+
+    label { display:block; font-size:0.78rem; color:var(--ink-soft); margin:12px 0 5px; }
+    label:first-of-type { margin-top:0; }
+    select, input { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px;
+      background:var(--panel2); color:var(--ink); font-size:0.87rem; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:0 14px; }
+    .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:0 14px; }
+    .check-row { display:flex; align-items:center; gap:8px; margin-top:14px; }
+    .check-row input { width:auto; }
+    .check-row label { margin:0; color:var(--ink); font-size:0.85rem; }
+
+    button.primary, .btn-primary { padding:9px 18px; border:none; border-radius:6px; background:var(--accent); color:#fff;
+      font-size:0.85rem; font-weight:600; cursor:pointer; text-decoration:none; display:inline-block; }
+    button.primary:hover { filter:brightness(1.08); }
+    button.ghost { padding:9px 16px; border:1px solid var(--line); border-radius:6px; background:transparent;
+      color:var(--ink-soft); font-size:0.85rem; cursor:pointer; }
+    .mt { margin-top:18px; }
+
+    table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+    th { text-align:left; color:var(--ink-soft); font-weight:550; font-size:0.75rem; padding:8px 10px; border-bottom:1px solid var(--line); }
+    td { padding:9px 10px; border-bottom:1px solid var(--line); }
+    tr:last-child td { border-bottom:none; }
+    .badge { padding:3px 9px; border-radius:999px; font-size:0.75rem; font-weight:600; }
+    .badge.ok { background:var(--ok-soft); color:var(--ok); }
+    .badge.no { background:var(--danger-soft); color:var(--danger); }
+    .acoes { display:flex; gap:10px; }
+    .acoes a, .acoes button { background:none; border:none; color:var(--ink-soft); cursor:pointer; font-size:0.95rem; padding:0; text-decoration:none; }
+    .acoes a:hover, .acoes button:hover { color:var(--ink); }
+    .acoes a.del:hover, .acoes button.del:hover { color:var(--danger); }
+    .empty-row td { color:var(--ink-soft); text-align:center; padding:16px; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<aside>
+  <div class="brand">Cash4<span>You</span></div>
+  <a href="{% url 'home' %}" class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+  <a href="{% url 'adicionar' %}" class="nav-item {% if request.resolver_match.url_name == 'adicionar' %}active{% endif %}">Adicionar</a>
+  <a href="{% url 'visualizar' %}" class="nav-item {% if request.resolver_match.url_name == 'visualizar' %}active{% endif %}">Visualizar</a>
+  <a href="{% url 'caixa' %}" class="nav-item {% if request.resolver_match.url_name == 'caixa' %}active{% endif %}">Caixa</a>
+  <a href="{% url 'relatorios' %}" class="nav-item {% if request.resolver_match.url_name == 'relatorios' %}active{% endif %}">Relatórios</a>
+</aside>
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+{% block extra_script %}{% endblock %}
+</body>
+</html>

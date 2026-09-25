@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="page-title">Caixa</h1>
+<div class="panel">
+  <p>Produtos cadastrados: {{ produtos|length }}</p>
+  <p>Serviços cadastrados: {{ servicos|length }}</p>
+</div>
+{% endblock %}

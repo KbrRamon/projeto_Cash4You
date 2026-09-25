@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cash4You</title>
+<style>
+  :root {
+    --bg:#10151C; --sidebar:#141B24; --panel:#1B2430; --panel2:#212C3A;
+    --ink:#EAEDF2; --ink-soft:#8B95A5; --line:#2A3441;
+    --accent:#3B82F6; --accent-soft:#1E2A3E;
+    --ok:#22C55E; --ok-soft:#14301F; --danger:#EF4444; --danger-soft:#33191B;
+    box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); min-height:100vh; display:flex;
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  aside { width:220px; flex-shrink:0; background:var(--sidebar); border-right:1px solid var(--line);
+    padding:20px 14px; display:flex; flex-direction:column; gap:2px; position:sticky; top:0; height:100vh; }
+  .brand { font-size:1.6rem; font-weight:750; padding:4px 8px 22px; letter-spacing:-0.01em; }
+  .brand span { color:var(--accent); }
+  .nav-item { display:flex; align-items:center; padding:9px 10px; border-radius:7px;
+    color:var(--ink-soft); font-size:0.86rem; font-weight:550; text-decoration:none; cursor:pointer; }
+  .nav-item:hover { background:var(--panel2); color:var(--ink); }
+  .nav-item.active { background:var(--accent-soft); color:var(--accent); }
+
+  main { flex:1; padding:28px 32px 60px; min-width:0; }
+  .view { display:none; }
+  .view.active { display:block; }
+  .page-title { font-size:1.3rem; font-weight:650; margin:0 0 18px; }
+
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:22px; margin-bottom:18px; }
+  .panel h2 { font-size:0.95rem; font-weight:650; margin:0 0 14px; }
+  .welcome { max-width:480px; color:var(--ink-soft); font-size:0.95rem; line-height:1.6; }
+  .welcome b { color:var(--ink); font-size:1.1rem; display:block; margin-bottom:8px; }
+
+  label { display:block; font-size:0.78rem; color:var(--ink-soft); margin:12px 0 5px; }
+  label:first-of-type { margin-top:0; }
+  select, input { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px;
+    background:var(--panel2); color:var(--ink); font-size:0.87rem; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:0 14px; }
+  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:0 14px; }
+  .check-row { display:flex; align-items:center; gap:8px; margin-top:14px; }
+  .check-row input { width:auto; }
+  .check-row label { margin:0; color:var(--ink); font-size:0.85rem; }
+
+  button.primary { padding:9px 18px; border:none; border-radius:6px; background:var(--accent); color:#fff;
+    font-size:0.85rem; font-weight:600; cursor:pointer; }
+  button.primary:hover { filter:brightness(1.08); }
+  button.primary:disabled { opacity:0.4; cursor:not-allowed; }
+  button.ghost { padding:9px 16px; border:1px solid var(--line); border-radius:6px; background:transparent;
+    color:var(--ink-soft); font-size:0.85rem; cursor:pointer; }
+  .mt { margin-top:18px; }
+
+  table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+  th { text-align:left; color:var(--ink-soft); font-weight:550; font-size:0.75rem; padding:8px 10px; border-bottom:1px solid var(--line); }
+  td { padding:9px 10px; border-bottom:1px solid var(--line); }
+  tr:last-child td { border-bottom:none; }
+  .badge { padding:3px 9px; border-radius:999px; font-size:0.75rem; font-weight:600; }
+  .badge.ok { background:var(--ok-soft); color:var(--ok); }
+  .badge.no { background:var(--danger-soft); color:var(--danger); }
+  .acoes { display:flex; gap:10px; }
+  .acoes button { background:none; border:none; color:var(--ink-soft); cursor:pointer; font-size:0.95rem; padding:0; }
+  .acoes button:hover { color:var(--ink); }
+  .acoes button.del:hover { color:var(--danger); }
+  .empty-row td { color:var(--ink-soft); text-align:center; padding:16px; }
+
+  .stepper { display:flex; align-items:center; gap:8px; }
+  .stepper button { width:22px; height:22px; border:1px solid var(--line); background:var(--panel2); color:var(--ink);
+    border-radius:5px; cursor:pointer; font-size:0.9rem; line-height:1; }
+
+  .overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:50; }
+  .overlay.show { display:flex; }
+  .modal { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:24px; width:340px; }
+  .modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .modal-head h2 { margin:0; font-size:1rem; }
+  .modal-head button { background:none; border:none; color:var(--ink-soft); font-size:1.1rem; cursor:pointer; }
+  .modal .valor-total { font-size:1.3rem; font-weight:700; margin-bottom:14px; }
+  .troco { color:var(--ok); font-size:0.85rem; margin-top:8px; font-weight:600; }
+  .modal-actions { display:flex; gap:10px; margin-top:18px; }
+  .modal-actions .primary { flex:1; }
+
+  .dash-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media (max-width:900px) { .dash-grid { grid-template-columns:1fr; } }
+  .kpi-label { color:var(--ink-soft); font-size:0.78rem; }
+  .kpi { font-size:1.7rem; font-weight:700; margin-top:2px; }
+  .top-list { margin-top:14px; display:flex; flex-direction:column; gap:11px; }
+  .top-row .top-head { display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:4px; }
+  .top-row .top-head .nome { font-weight:600; }
+  .top-row .top-head .meta { color:var(--ink-soft); }
+  .bar-track { height:6px; background:var(--panel2); border-radius:999px; overflow:hidden; }
+  .bar-fill { height:100%; background:var(--accent); border-radius:999px; }
+  .top-row.servico .bar-fill { background:var(--ok); }
+  .month-bars { display:flex; align-items:flex-end; gap:20px; height:130px; margin-top:14px; }
+  .month-col { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; }
+  .month-col .val { font-size:0.72rem; color:var(--ink-soft); margin-bottom:5px; }
+  .month-col .bar { width:100%; max-width:56px; background:var(--panel2); border-radius:6px 6px 0 0; }
+  .month-col.current .bar { background:var(--accent); }
+  .month-col .lbl { font-size:0.8rem; margin-top:9px; color:var(--ink-soft); }
+  .month-col.current .lbl { color:var(--ink); font-weight:650; }
+
+  .legend { display:flex; gap:16px; font-size:0.76rem; color:var(--ink-soft); }
+  .legend .sw { width:10px; height:10px; border-radius:3px; display:inline-block; margin-right:5px; vertical-align:-1px; }
+  .group-chart { display:flex; align-items:flex-end; gap:22px; height:150px; margin-top:16px; flex-wrap:wrap; }
+  .group { display:flex; flex-direction:column; align-items:center; }
+  .group .bars { display:flex; align-items:flex-end; gap:4px; height:120px; }
+  .group .bars .bar { width:14px; border-radius:3px 3px 0 0; }
+  .group .bars .bar.m0 { background:#334155; }
+  .group .bars .bar.m1 { background:#475569; }
+  .group .bars .bar.m2 { background:var(--accent); }
+  .group .lbl { margin-top:8px; font-size:0.78rem; color:var(--ink-soft); text-align:center; max-width:80px; }
+
+  #print-area { display:none; }
+  @media print {
+    aside, main { display:none !important; }
+    #print-area { display:block !important; padding:20px; }
+    #print-area table { width:100%; border-collapse:collapse; }
+    #print-area th, #print-area td { border:1px solid #999; padding:6px 8px; text-align:left; font-size:0.85rem; }
+    #print-area .print-date { color:#555; font-size:0.8rem; margin-bottom:16px; }
+  }
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="brand">Cash4<span>You</span></div>
+  <div class="nav-item" id="nav-home" onclick="mostrarView('home')">Home</div>
+  <div class="nav-item" id="nav-adicionar" onclick="mostrarView('adicionar')">Adicionar</div>
+  <div class="nav-item" id="nav-visualizar" onclick="mostrarView('visualizar')">Visualizar</div>
+  <div class="nav-item" id="nav-caixa" onclick="mostrarView('caixa')">Caixa</div>
+  <div class="nav-item" id="nav-relatorios" onclick="mostrarView('relatorios')">Relatórios</div>
+</aside>
+
+<main>
+
+  <!-- HOME -->
+  <div class="view" id="view-home">
+    <h1 class="page-title">Cash4You</h1>
+    <div class="panel welcome">
+      <b>Bem-vindo ao Cash4You,</b>
+      A gestão do seu dinheiro no lugar certo!
+    </div>
+
+    <div class="dash-grid">
+      <div class="panel">
+        <h2>Vendas de Produtos</h2>
+        <div class="kpi-label">Total vendido</div>
+        <div class="kpi" id="vp-total"></div>
+        <div class="kpi-label" style="margin-top:16px">Top 3 mais vendidos</div>
+        <div class="top-list" id="vp-top"></div>
+      </div>
+      <div class="panel">
+        <h2>Vendas de Serviços</h2>
+        <div class="kpi-label">Total vendido</div>
+        <div class="kpi" id="vs-total"></div>
+        <div class="kpi-label" style="margin-top:16px">Top 3 mais vendidos</div>
+        <div class="top-list" id="vs-top"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Contas a Pagar — Principais contas (últimos 3 meses)</h2>
+      <div id="cp-meses"></div>
+    </div>
+  </div>
+
+  <!-- RELATÓRIOS -->
+  <div class="view" id="view-relatorios">
+    <h1 class="page-title">Relatórios</h1>
+    <div class="panel">
+      <h2>Relatório de Caixa</h2>
+      <div style="display:flex; gap:10px; flex-wrap:wrap">
+        <button class="ghost" onclick="relatorioCaixa('dia')">Imprimir — Dia</button>
+        <button class="ghost" onclick="relatorioCaixa('semana')">Imprimir — Semana</button>
+        <button class="ghost" onclick="relatorioCaixa('mes')">Imprimir — Mês</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Relatório de Estoque</h2>
+      <button class="ghost" onclick="relatorioEstoque()">Imprimir relatório de estoque</button>
+    </div>
+    <div class="panel">
+      <h2>Relatório de Contas a Pagar</h2>
+      <button class="ghost" onclick="relatorioContas()">Imprimir relatório de contas a pagar</button>
+    </div>
+  </div>
+
+  <!-- ADICIONAR -->
+  <div class="view" id="view-adicionar">
+    <h1 class="page-title">Adicionar Novo Registro</h1>
+    <div class="panel">
+      <label>Selecione uma opção</label>
+      <select id="tipo-add" onchange="trocarTipoAdd()">
+        <option value="produto">Produtos</option>
+        <option value="servico">Serviços</option>
+        <option value="conta">Contas a Pagar</option>
+      </select>
+
+      <div id="fa-produto" class="fa-tipo">
+        <div class="grid2"><div><label>Nome</label><input id="p-nome" placeholder="Ex: Camiseta"></div>
+        <div><label>Quantidade</label><input id="p-qtd" type="number" min="0" value="1"></div></div>
+        <div class="grid2"><div><label>Preço de Custo</label><input id="p-custo" type="number" step="0.01" min="0"></div>
+        <div><label>Preço de Venda</label><input id="p-venda" type="number" step="0.01" min="0"></div></div>
+      </div>
+      <div id="fa-servico" class="fa-tipo" style="display:none">
+        <div class="grid2"><div><label>Nome</label><input id="s-nome" placeholder="Ex: Consultoria"></div>
+        <div><label>Preço</label><input id="s-preco" type="number" step="0.01" min="0"></div></div>
+      </div>
+      <div id="fa-conta" class="fa-tipo" style="display:none">
+        <div class="grid2"><div><label>Nome</label><input id="c-nome" placeholder="Ex: Aluguel"></div>
+        <div><label>Valor</label><input id="c-valor" type="number" step="0.01" min="0"></div></div>
+        <label>Vencimento</label><input id="c-venc" type="date">
+        <div class="check-row"><input id="c-paga" type="checkbox"><label for="c-paga">Já paga</label></div>
+      </div>
+
+      <div class="mt">
+        <button class="primary" onclick="salvarItem()">Adicionar</button>
+        <button class="ghost" id="btn-cancel-edit" onclick="cancelarEdicao()" style="display:none">Cancelar edição</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 id="titulo-lista-add">Produtos</h2>
+      <table><thead><tr id="head-add"></tr></thead><tbody id="lista-add"></tbody></table>
+    </div>
+  </div>
+
+  <!-- VISUALIZAR -->
+  <div class="view" id="view-visualizar">
+    <h1 class="page-title">Visualizar Itens Cadastrados</h1>
+    <div class="panel">
+      <label>Selecione uma opção</label>
+      <select id="tipo-view" onchange="renderView()">
+        <option value="produto">Produtos</option>
+        <option value="servico">Serviços</option>
+        <option value="conta">Contas a Pagar</option>
+      </select>
+    </div>
+    <div class="panel">
+      <table><thead><tr id="head-view"></tr></thead><tbody id="lista-view"></tbody></table>
+    </div>
+  </div>
+
+  <!-- CAIXA -->
+  <div class="view" id="view-caixa">
+    <h1 class="page-title">Ponto de Venda (Caixa)</h1>
+    <div class="panel">
+      <div class="grid2">
+        <div><label>Cliente</label><input id="cx-cliente" value="Usuario"></div>
+        <div><label>Data</label><input id="cx-data" type="date"></div>
+      </div>
+      <div class="grid3">
+        <div><label>Serviço ou Produto</label><select id="cx-tipo" onchange="popularItensCaixa()">
+          <option value="produto">Produto</option><option value="servico">Serviço</option>
+        </select></div>
+        <div><label>Item</label><select id="cx-item"></select></div>
+        <div style="display:flex; align-items:flex-end"><button class="primary" style="width:100%" onclick="addAoCarrinho()">Adicionar item</button></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Itens da Venda</h2>
+      <table><thead><tr><th>Item</th><th>Quantidade</th><th>Valor Unitário</th><th>Valor Total</th><th>Ações</th></tr></thead>
+        <tbody id="lista-carrinho"></tbody></table>
+      <div class="mt" style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:16px">
+        <div>
+          <div style="color:var(--ink-soft); font-size:0.8rem">Total a Pagar</div>
+          <div style="font-size:1.4rem; font-weight:700" id="cx-total">R$0.00</div>
+        </div>
+        <button class="primary" id="btn-pagar" onclick="abrirPagamento()" disabled>Pagar</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="print-area"></div>
+
+<!-- MODAL PAGAMENTO -->
+<div class="overlay" id="overlay-pag">
+  <div class="modal">
+    <div class="modal-head"><h2>Pagamento</h2><button onclick="fecharPagamento()">✕</button></div>
+    <div class="valor-total">Valor Total a Pagar: <span id="pg-total"></span></div>
+    <label>Método de pagamento</label>
+    <select id="pg-metodo" onchange="trocarMetodo()">
+      <option value="Crédito">Crédito</option><option value="Débito">Débito</option>
+      <option value="PIX">PIX</option><option value="Dinheiro">Dinheiro</option><option value="Voucher">Voucher</option>
+    </select>
+    <div id="pg-dinheiro" style="display:none">
+      <label>Valor Pago</label>
+      <input id="pg-pago" type="number" step="0.01" min="0" oninput="calcularTroco()">
+      <div class="troco" id="pg-troco"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="primary" onclick="confirmarPagamento()">Confirmar Pagamento</button>
+      <button class="ghost" onclick="fecharPagamento()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const fmt = v => "R$" + Number(v||0).toFixed(2);
+  const fmtData = d => d ? d.split("-").reverse().join("/") : "";
+
+  let dados = {
+    produto: [{ nome:"Camiseta", qtd:100, custo:20, venda:45 }],
+    servico: [{ nome:"Consultoria", preco:150 }],
+    conta:   [{ nome:"Aluguel", valor:1500, venc:"2026-11-10", paga:false }],
+  };
+  let editando = null;
+  let carrinho = [];
+
+  const HEADS = {
+    produto: ["Nome","Quantidade","Preço de Custo","Preço de Venda","Ações"],
+    servico: ["Nome","Preço","Ações"],
+    conta:   ["Nome","Valor","Vencimento","Status","Ações"],
+  };
+  const TITULOS = { produto:"Produtos", servico:"Serviços", conta:"Contas a Pagar" };
+
+  function mostrarView(v) {
+    document.querySelectorAll(".view").forEach(el => el.classList.remove("active"));
+    document.getElementById("view-" + v).classList.add("active");
+    document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+    document.getElementById("nav-" + v).classList.add("active");
+    if (v === "visualizar") renderView();
+    if (v === "adicionar") renderAdd();
+  }
+
+  // ---- ADICIONAR ----
+  function trocarTipoAdd() {
+    const tipo = document.getElementById("tipo-add").value;
+    document.querySelectorAll(".fa-tipo").forEach(el => el.style.display = "none");
+    document.getElementById("fa-" + tipo).style.display = "block";
+    renderAdd();
+  }
+  function limparForm(tipo) {
+    if (tipo==="produto") { p_nome.value=""; p_qtd.value=1; p_custo.value=""; p_venda.value=""; }
+    if (tipo==="servico") { s_nome.value=""; s_preco.value=""; }
+    if (tipo==="conta") { c_nome.value=""; c_valor.value=""; c_venc.value=""; c_paga.checked=false; }
+  }
+  function salvarItem() {
+    const tipo = document.getElementById("tipo-add").value;
+    let item;
+    if (tipo==="produto") { if(!p_nome.value) return; item={nome:p_nome.value,qtd:+p_qtd.value,custo:+p_custo.value,venda:+p_venda.value}; }
+    else if (tipo==="servico") { if(!s_nome.value) return; item={nome:s_nome.value,preco:+s_preco.value}; }
+    else { if(!c_nome.value) return; item={nome:c_nome.value,valor:+c_valor.value,venc:c_venc.value,paga:c_paga.checked}; }
+
+    if (editando && editando.tipo===tipo) { dados[tipo][editando.index]=item; editando=null; document.getElementById("btn-cancel-edit").style.display="none"; }
+    else dados[tipo].push(item);
+    limparForm(tipo);
+    renderAdd();
+  }
+  function editarItem(tipo, i) {
+    const it = dados[tipo][i];
+    document.getElementById("tipo-add").value = tipo; trocarTipoAdd();
+    if (tipo==="produto") { p_nome.value=it.nome; p_qtd.value=it.qtd; p_custo.value=it.custo; p_venda.value=it.venda; }
+    if (tipo==="servico") { s_nome.value=it.nome; s_preco.value=it.preco; }
+    if (tipo==="conta") { c_nome.value=it.nome; c_valor.value=it.valor; c_venc.value=it.venc; c_paga.checked=it.paga; }
+    editando = { tipo, index:i };
+    document.getElementById("btn-cancel-edit").style.display = "inline-block";
+    mostrarView("adicionar");
+  }
+  function cancelarEdicao() {
+    const tipo = document.getElementById("tipo-add").value;
+    limparForm(tipo); editando=null;
+    document.getElementById("btn-cancel-edit").style.display="none";
+  }
+  function excluirItem(tipo, i) {
+    dados[tipo].splice(i,1);
+    renderAdd(); renderView();
+  }
+
+  function linhaTabela(tipo, it, i, editorFn) {
+    if (tipo==="produto") return `<tr><td>${it.nome}</td><td>${it.qtd}</td><td>${fmt(it.custo)}</td><td>${fmt(it.venda)}</td>
+      <td class="acoes"><button onclick="${editorFn}('produto',${i})">✎</button><button class="del" onclick="excluirItem('produto',${i})">✕</button></td></tr>`;
+    if (tipo==="servico") return `<tr><td>${it.nome}</td><td>${fmt(it.preco)}</td>
+      <td class="acoes"><button onclick="${editorFn}('servico',${i})">✎</button><button class="del" onclick="excluirItem('servico',${i})">✕</button></td></tr>`;
+    return `<tr><td>${it.nome}</td><td>${fmt(it.valor)}</td><td>${fmtData(it.venc)}</td>
+      <td><span class="badge ${it.paga?"ok":"no"}">${it.paga?"Paga":"Não"}</span></td>
+      <td class="acoes"><button onclick="${editorFn}('conta',${i})">✎</button><button class="del" onclick="excluirItem('conta',${i})">✕</button></td></tr>`;
+  }
+  function preencherCabecalho(theadRow, tipo) {
+    theadRow.innerHTML = HEADS[tipo].map(h => `<th>${h}</th>`).join("");
+  }
+
+  function renderAdd() {
+    const tipo = document.getElementById("tipo-add").value;
+    document.getElementById("titulo-lista-add").textContent = TITULOS[tipo];
+    preencherCabecalho(document.getElementById("head-add"), tipo);
+    const tbody = document.getElementById("lista-add");
+    tbody.innerHTML = dados[tipo].length
+      ? dados[tipo].map((it,i) => linhaTabela(tipo, it, i, "editarItem")).join("")
+      : `<tr class="empty-row"><td colspan="${HEADS[tipo].length}">Nenhum item cadastrado.</td></tr>`;
+  }
+
+  // ---- VISUALIZAR ----
+  function renderView() {
+    const tipo = document.getElementById("tipo-view").value;
+    preencherCabecalho(document.getElementById("head-view"), tipo);
+    const tbody = document.getElementById("lista-view");
+    tbody.innerHTML = dados[tipo].length
+      ? dados[tipo].map((it,i) => linhaTabela(tipo, it, i, "editarItem")).join("")
+      : `<tr class="empty-row"><td colspan="${HEADS[tipo].length}">Nenhum item cadastrado.</td></tr>`;
+  }
+
+  // ---- CAIXA ----
+  function popularItensCaixa() {
+    const tipo = document.getElementById("cx-tipo").value;
+    const sel = document.getElementById("cx-item");
+    sel.innerHTML = dados[tipo].map((it,i) => `<option value="${i}">${it.nome}</option>`).join("");
+  }
+  function addAoCarrinho() {
+    const tipo = document.getElementById("cx-tipo").value;
+    const idx = +document.getElementById("cx-item").value;
+    const it = dados[tipo][idx];
+    if (!it) return;
+    const valorUnit = tipo==="produto" ? it.venda : it.preco;
+    carrinho.push({ nome:it.nome, qtd:1, valorUnit });
+    renderCarrinho();
+  }
+  function alterarQtd(i, delta) {
+    carrinho[i].qtd = Math.max(1, carrinho[i].qtd + delta);
+    renderCarrinho();
+  }
+  function excluirCarrinho(i) { carrinho.splice(i,1); renderCarrinho(); }
+
+  function renderCarrinho() {
+    const tbody = document.getElementById("lista-carrinho");
+    tbody.innerHTML = carrinho.length ? carrinho.map((it,i) => `
+      <tr><td>${it.nome}</td>
+      <td class="stepper"><button onclick="alterarQtd(${i},-1)">−</button>${it.qtd}<button onclick="alterarQtd(${i},1)">+</button></td>
+      <td>${fmt(it.valorUnit)}</td><td>${fmt(it.qtd*it.valorUnit)}</td>
+      <td class="acoes"><button class="del" onclick="excluirCarrinho(${i})">✕</button></td></tr>
+    `).join("") : `<tr class="empty-row"><td colspan="5">Nenhum item na venda.</td></tr>`;
+    const total = carrinho.reduce((s,it) => s + it.qtd*it.valorUnit, 0);
+    document.getElementById("cx-total").textContent = fmt(total);
+    document.getElementById("btn-pagar").disabled = carrinho.length===0;
+  }
+
+  // ---- PAGAMENTO ----
+  function abrirPagamento() {
+    const total = carrinho.reduce((s,it) => s + it.qtd*it.valorUnit, 0);
+    document.getElementById("pg-total").textContent = fmt(total);
+    document.getElementById("pg-metodo").value = "Crédito";
+    document.getElementById("pg-pago").value = "";
+    document.getElementById("pg-troco").textContent = "";
+    trocarMetodo();
+    document.getElementById("overlay-pag").classList.add("show");
+  }
+  function fecharPagamento() { document.getElementById("overlay-pag").classList.remove("show"); }
+  function trocarMetodo() {
+    document.getElementById("pg-dinheiro").style.display = document.getElementById("pg-metodo").value === "Dinheiro" ? "block" : "none";
+  }
+  function calcularTroco() {
+    const total = carrinho.reduce((s,it) => s + it.qtd*it.valorUnit, 0);
+    const pago = +document.getElementById("pg-pago").value || 0;
+    const troco = pago - total;
+    document.getElementById("pg-troco").textContent = troco >= 0 ? `Troco a Devolver: ${fmt(troco)}` : "";
+  }
+  function confirmarPagamento() {
+    carrinho = [];
+    renderCarrinho();
+    fecharPagamento();
+  }
+
+  // ---- DASHBOARDS (HOME) ----
+  // Dados de exemplo — no backend real, viriam de uma agregação de ItemVenda
+  // (SUM de quantidade/valor, agrupado por produto/serviço) e de ContaPagar
+  // (SUM de valor, agrupado por mês).
+  const vendasProdutos = { total: 12450.00, top3: [
+    { nome:"Camiseta", qtd:86, valor:3870 }, { nome:"Tênis", qtd:54, valor:5400 }, { nome:"Boné", qtd:40, valor:1200 },
+  ]};
+  const vendasServicos = { total: 8200.00, top3: [
+    { nome:"Consultoria", qtd:22, valor:3300 }, { nome:"Manutenção", qtd:18, valor:2160 }, { nome:"Instalação", qtd:15, valor:975 },
+  ]};
+  const contasPrincipais = [
+    { nome:"Aluguel", valores:[1500, 1500, 1500] },
+    { nome:"Energia", valores:[320, 410, 380] },
+    { nome:"Água", valores:[95, 110, 105] },
+    { nome:"Internet", valores:[120, 120, 120] },
+    { nome:"Funcionários", valores:[4200, 4200, 4350] },
+  ]; // cada "valores": [2 meses atrás, mês passado, mês atual]
+
+  function nomeMes(offset) {
+    const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - offset);
+    const s = d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  function renderTopList(container, top3, classe) {
+    const max = Math.max(...top3.map(i => i.qtd));
+    container.innerHTML = top3.map(i => `
+      <div class="top-row ${classe}">
+        <div class="top-head"><span class="nome">${i.nome}</span><span class="meta">${i.qtd} un · ${fmt(i.valor)}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(i.qtd/max*100).toFixed(0)}%"></div></div>
+      </div>`).join("");
+  }
+
+  function renderContasPrincipais() {
+    const cont = document.getElementById("cp-meses");
+    const legenda = `<div class="legend">
+      <span><span class="sw" style="background:#334155"></span>${nomeMes(2)}</span>
+      <span><span class="sw" style="background:#475569"></span>${nomeMes(1)}</span>
+      <span><span class="sw" style="background:var(--accent)"></span>${nomeMes(0)}</span>
+    </div>`;
+    const grupos = contasPrincipais.map(c => {
+      const max = Math.max(...c.valores);
+      const barras = c.valores.map((v, i) => `<div class="bar m${i}" style="height:${(v/max*100).toFixed(0)}%" title="${fmt(v)}"></div>`).join("");
+      return `<div class="group"><div class="bars">${barras}</div><div class="lbl">${c.nome}</div></div>`;
+    }).join("");
+    cont.innerHTML = legenda + `<div class="group-chart">${grupos}</div>`;
+  }
+
+  function renderDashboards() {
+    document.getElementById("vp-total").textContent = fmt(vendasProdutos.total);
+    renderTopList(document.getElementById("vp-top"), vendasProdutos.top3, "produto");
+    document.getElementById("vs-total").textContent = fmt(vendasServicos.total);
+    renderTopList(document.getElementById("vs-top"), vendasServicos.top3, "servico");
+    renderContasPrincipais();
+  }
+
+  // ---- RELATÓRIOS (impressão) ----
+  function imprimir(titulo, htmlConteudo) {
+    document.getElementById("print-area").innerHTML =
+      `<h1>${titulo}</h1><p class="print-date">Gerado em ${new Date().toLocaleDateString("pt-BR")}</p>${htmlConteudo}`;
+    window.print();
+  }
+  function relatorioCaixa(periodo) {
+    // No backend real, esses totais viriam de um filtro de Venda por data.
+    const totais = { dia: 850, semana: 4200, mes: 12450 };
+    const label = { dia: "do Dia", semana: "da Semana", mes: "do Mês" }[periodo];
+    const html = `<table><thead><tr><th>Período</th><th>Total de Vendas</th></tr></thead>
+      <tbody><tr><td>Relatório ${label}</td><td>${fmt(totais[periodo])}</td></tr></tbody></table>`;
+    imprimir(`Relatório de Caixa — ${label}`, html);
+  }
+  function relatorioEstoque() {
+    const linhas = dados.produto.map(p => `<tr><td>${p.nome}</td><td>${p.qtd}</td></tr>`).join("");
+    const html = `<table><thead><tr><th>Item</th><th>Quantidade Disponível</th></tr></thead>
+      <tbody>${linhas || '<tr><td colspan="2">Nenhum produto cadastrado.</td></tr>'}</tbody></table>`;
+    imprimir("Relatório de Estoque", html);
+  }
+  function relatorioContas() {
+    const linhas = dados.conta.map(c => `<tr><td>${c.nome}</td><td>${fmt(c.valor)}</td><td>${fmtData(c.venc)}</td><td>${c.paga ? "Paga" : "Não paga"}</td></tr>`).join("");
+    const html = `<table><thead><tr><th>Nome</th><th>Valor</th><th>Vencimento</th><th>Status</th></tr></thead>
+      <tbody>${linhas || '<tr><td colspan="4">Nenhuma conta cadastrada.</td></tr>'}</tbody></table>`;
+    imprimir("Relatório de Contas a Pagar", html);
+  }
+
+  // init
+  document.getElementById("cx-data").valueAsDate = new Date();
+  popularItensCaixa();
+  renderCarrinho();
+  renderDashboards();
+  mostrarView("home");
+</script>
+</body>
+</html>
